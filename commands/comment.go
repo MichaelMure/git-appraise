@@ -99,9 +99,17 @@ func commentOnReview(repo repository.Repo, args []string) error {
 	}
 
 	if *commentMessage == "" {
-		*commentMessage, err = input.LaunchEditor(repo, commentFilename)
+		stdin, err := input.ReadAvailableStdIn()
 		if err != nil {
 			return err
+		}
+		if len(stdin) > 0 {
+			*commentMessage = stdin
+		} else {
+			*commentMessage, err = input.LaunchEditor(repo, commentFilename)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

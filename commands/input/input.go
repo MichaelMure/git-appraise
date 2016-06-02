@@ -78,3 +78,19 @@ func startInlineCommand(command string, args ...string) (*exec.Cmd, error) {
 	err := cmd.Start()
 	return cmd, err
 }
+
+func ReadAvailableStdIn() (string, error) {
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		// data is being piped to stdin
+		bytes, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			return "", nil
+		}
+
+		return string(bytes), nil
+	}
+
+	// stdin is from a terminal
+	return "", nil
+}

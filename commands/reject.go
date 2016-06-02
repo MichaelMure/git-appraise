@@ -57,9 +57,17 @@ func rejectReview(repo repository.Repo, args []string) error {
 	}
 
 	if *rejectMessage == "" {
-		*rejectMessage, err = input.LaunchEditor(repo, commentFilename)
+		stdin, err := input.ReadAvailableStdIn()
 		if err != nil {
 			return err
+		}
+		if len(stdin) > 0 {
+			*rejectMessage = stdin
+		} else {
+			*rejectMessage, err = input.LaunchEditor(repo, commentFilename)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
