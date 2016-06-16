@@ -1,0 +1,51 @@
+11ff42c1c7ba [pending] review/foo -> master
+
+Fix typos and remove trailing whitespaces
+
+Requester:
+  Alexandre Franke <alexandre.franke@gmail.com>
+Reviewer:
+  machin1
+  machin2
+  machin3
+  machin4
+Commits: (git log master..review/foo --oneline)
+  7c46dfd commit de test de la review
+  7c46dfd commit de test de la review
+  7c46dfd commit de test de la review
+
+build status: unknown
+analyses:  No analyses available
+
+[fyi] Thu Jun 2 21:58:22 CEST 2016
+batolettre@gmail.com
+commentaire 1
+
+[fyi] Thu Jun 2 21:59:23 CEST 2016
+batolettre@gmail.com commented on src/blah/notes.txt
+commentaire 2
+
+src/blah/notes.txt
+ 2. Page de login
+     - doit vérifier si l'utilisateur existe bien dans la base de donnée ;
+         - cf méthode dnsmanager::auth ;
++sececse
++
++
++
++ceqefceq
+----[cc0d3b212497] batolettre@gmail on Thu Jun 9 19:20:51 CEST 2016---------------------------------------
+| commentaire 2
+----[9f77429ebde1] batolettre@gmail on Thu Jun 9 19:21:44 CEST 2016 --------------------------------------
+  | réponse 2
+----------------------------------------------------------------------------------------------------------
++
++
++
++
++qzdf
+     - si l'utilisateur est un administrateur, fournir un lien supplémentaire vers la page d'administration ;
+         - cf lire le résultat renvoyé par auth (contient la liste des données de l'utilisateur stockés en bdd ;
+         - la page d'administration doit refuser un non administrateur ;
+
+

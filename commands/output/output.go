@@ -27,7 +27,7 @@ import (
 
 const (
 	// Template for printing the summary of a code review.
-	reviewSummaryTemplate = `[%s] %.12s
+	reviewSummaryTemplate = `[%s] %.12s (%d comment%s)
   %s
 `
 	// Template for printing the summary of a code review.
@@ -77,7 +77,19 @@ func getStatusString(r *review.Summary) string {
 func PrintSummary(r *review.Summary) {
 	statusString := getStatusString(r)
 	indentedDescription := strings.Replace(r.Request.Description, "\n", "\n  ", -1)
-	fmt.Printf(reviewSummaryTemplate, statusString, r.Revision, indentedDescription)
+	commentCount := r.CommentCount();
+
+	var grammar string = ""
+	if commentCount > 1 {
+		grammar = "s"
+	}
+
+	fmt.Printf(reviewSummaryTemplate,
+		statusString,
+		r.Revision,
+		commentCount,
+		grammar,
+		indentedDescription)
 }
 
 // reformatTimestamp takes a timestamp string of the form "0123456789" and changes it

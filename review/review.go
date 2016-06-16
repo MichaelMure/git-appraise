@@ -241,6 +241,28 @@ func (r *Summary) Details() (*Review, error) {
 	return &review, nil
 }
 
+// Get the total number of comments in a review
+func (s *Summary) CommentCount() (uint) {
+	var count uint = 0
+
+	for _, c := range s.Comments {
+		count += c.CommentCount()
+	}
+
+	return count
+}
+
+// Get the total number of comments in a comment thread
+func (cs *CommentThread) CommentCount() (uint) {
+	var count uint = 1
+
+	for _,  child := range cs.Children {
+		count += child.CommentCount()
+	}
+
+	return count
+}
+
 // Get returns the specified code review.
 //
 // If no review request exists, the returned review is nil.
