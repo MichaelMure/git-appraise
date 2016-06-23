@@ -26,15 +26,25 @@ import (
 )
 
 const (
-	// Template for printing the summary of a code review.
+	// Template for printing the list summary of a code review.
 	reviewSummaryTemplate = `[%s] %.12s (%d comment%s)
   %s
 `
 	// Template for printing the summary of a code review.
-	reviewDetailsTemplate = `  %q -> %q
-  reviewers: %q
-  requester: %q
-  build status: %s
+	reviewDetailsTemplate = `%.12s [%s] %s -> %s
+
+%s
+
+Requester:
+  %s
+Reviewers:
+  %s
+Commits:
+  %s
+
+Build status: %s
+Analyses: %s
+
 `
 	// Template for printing the location of an inline comment
 	commentLocationTemplate = `%s%q@%.12s
@@ -74,7 +84,7 @@ func getStatusString(r *review.Summary) string {
 }
 
 // PrintSummary prints a single-line summary of a review.
-func PrintSummary(r *review.Summary) {
+func PrintListSummary(r *review.Summary) {
 	statusString := getStatusString(r)
 	indentedDescription := strings.Replace(r.Request.Description, "\n", "\n  ", -1)
 	commentCount := r.CommentCount();
@@ -159,11 +169,6 @@ func showSubThread(r *review.Review, thread review.CommentThread, indent string)
 	return nil
 }
 
-// printAnalyses prints the static analysis results for the latest commit in the review.
-func printAnalyses(r *review.Review) {
-	fmt.Println("  analyses: ", r.GetAnalysesMessage())
-}
-
 // printComments prints all of the comments for the review, with snippets of the preceding source code.
 func printComments(r *review.Review) error {
 	fmt.Printf(commentSummaryTemplate, len(r.Comments))
@@ -178,11 +183,39 @@ func printComments(r *review.Review) error {
 
 // PrintDetails prints a multi-line overview of a review, including all comments.
 func PrintDetails(r *review.Review) error {
-	PrintSummary(r.Summary)
-	fmt.Printf(reviewDetailsTemplate, r.Request.ReviewRef, r.Request.TargetRef,
-		strings.Join(r.Request.Reviewers, ", "),
-		r.Request.Requester, r.GetBuildStatusMessage())
-	printAnalyses(r)
+	summary := r.Summary
+
+	statusString := getStatusString(summary)
+
+	reviewers := "none"
+	if len(r.Request.Reviewers) > 0 {
+		reviewers = strings.Join(r.Request.Reviewers, "\n  ")
+	}
+
+	base, err := r.Repo.MergeBase(r.Request.TargetRef, r.Request.ReviewRef)
+	if err != nil {
+		return err
+	}
+
+	reviewCommits, err := r.Repo.ListCommitsBetween(base, r.Request.ReviewRef)
+	if err != nil {
+		return err
+	}
+
+	commits := strings.Join(reviewCommits, "\n  ")
+
+	fmt.Printf(reviewDetailsTemplate,
+		r.Revision,
+		statusString,
+		r.Request.ReviewRef,
+		r.Request.TargetRef,
+		r.Request.Description,
+		r.Request.Requester,
+		reviewers,
+		commits,
+		r.GetBuildStatusMessage(),
+		r.GetAnalysesMessage())
+
 	if err := printComments(r); err != nil {
 		return err
 	}

@@ -190,6 +190,8 @@ func (repo *GitRepo) GetCommitTime(ref string) (string, error) {
 	return repo.runGitCommand("show", "-s", "--format=%ct", ref)
 }
 
+func (repo *GitRepo) GetCommitOneLine(ref string) (string, error)
+
 // GetLastParent returns the last parent of the given commit (as ordered by git).
 func (repo *GitRepo) GetLastParent(ref string) (string, error) {
 	return repo.runGitCommand("rev-list", "--skip", "1", "-n", "1", ref)
@@ -310,6 +312,31 @@ func (repo *GitRepo) RebaseRef(ref string) error {
 // The generated list is in chronological order (with the oldest commit first).
 func (repo *GitRepo) ListCommitsBetween(from, to string) ([]string, error) {
 	out, err := repo.runGitCommand("rev-list", "--reverse", "--ancestry-path", from+".."+to)
+	if err != nil {
+		return nil, err
+	}
+	if out == "" {
+		return nil, nil
+	}
+	return strings.Split(out, "\n"), nil
+}
+
+// ListOneLineLogBetween returns the list of one-line logs between the two given revisions.
+//
+// The "from" parameter is the starting point (exclusive), and the "to"
+// parameter is the ending point (inclusive).
+//
+// The "from" commit does not need to be an ancestor of the "to" commit. If it
+// is not, then the merge base of the two is used as the starting point.
+// Admittedly, this makes calling these the "between" commits is a bit of a
+// misnomer, but it also makes the method easier to use when you want to
+// generate the list of changes in a feature branch, as it eliminates the need
+// to explicitly calculate the merge base. This also makes the semantics of the
+// method compatible with git's built-in "rev-list" command.
+//
+// The generated list is in chronological order (with the oldest commit first).
+func (repo *GitRepo) ListOneLineLogBetween(from, to string) ([]string, error) {
+	out, err := repo.runGitCommand("log", "--oneline", from+".."+to)
 	if err != nil {
 		return nil, err
 	}
